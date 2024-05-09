@@ -31,27 +31,31 @@ public class EmailService(EmailClient emailClient, ILogger<EmailService> logger)
 
     public bool SendEmail(EmailRequest emailRequest)
     {
-        try
+        if (emailRequest.Subject != null && emailRequest.To != null) 
         {
-            var result = _emailClient.Send(
-        WaitUntil.Completed,
-
-            senderAddress: Environment.GetEnvironmentVariable("SenderAddress"),
-            recipientAddress: emailRequest.To,
-            subject: emailRequest.Subject,
-            htmlContent: emailRequest.HtmlBody,
-            plainTextContent: emailRequest.PlainText);
-
-            if (result.HasCompleted)
+            try
             {
-                return true;
+                var result = _emailClient.Send(
+            WaitUntil.Completed,
+
+                senderAddress: Environment.GetEnvironmentVariable("SenderAddress"),
+                recipientAddress: emailRequest.To,
+                subject: emailRequest.Subject,
+                htmlContent: emailRequest.HtmlBody,
+                plainTextContent: emailRequest.PlainText);
+
+                if (result.HasCompleted)
+                {
+                    return true;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError($"ERROR : EmailSender.SendEmail() :: {ex.Message}");
             }
         }
-
-        catch (Exception ex)
-        {
-            _logger.LogError($"ERROR : EmailSender.SendEmailAsync() :: {ex.Message}");
-        }
+       
         return false;
     }
 }
