@@ -14,7 +14,7 @@ public class EmailSender(ILogger<EmailSender> logger, IEmailService emailService
 
     [Function(nameof(EmailSender))]
     public async Task Run(
-        [ServiceBusTrigger("email_request", Connection = "ServiceBusConnection")]
+        [ServiceBusTrigger("email", Connection = "ServiceBusConnection")]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions)
     {
