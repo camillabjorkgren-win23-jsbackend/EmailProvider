@@ -6,15 +6,23 @@ using Microsoft.Extensions.Logging;
 
 namespace EmailProvider.Functions;
 
-public class EmailSender(ILogger<EmailSender> logger, IEmailService emailService)
+public class EmailSender
 {
-    private readonly ILogger<EmailSender> _logger = logger;
-    private readonly IEmailService _emailService = emailService;
-
-
+    private readonly ILogger<EmailSender> _logger;
+    private readonly IEmailService _emailService;
+    private readonly string _queueName;
+    private readonly string _serviceBusConnection;
+    public EmailSender(ILogger<EmailSender> logger, IEmailService emailService)
+    {
+        _logger = logger;
+        _emailService = emailService;
+        _queueName = Environment.GetEnvironmentVariable("ServiceBusQueueName")!;
+        _serviceBusConnection = Environment.GetEnvironmentVariable("ServiceBusConnection")!;
+    }
+    [ServiceBusOutput("verification", Connection = "ServiceBusConnection")]
     [Function(nameof(EmailSender))]
     public async Task Run(
-        [ServiceBusTrigger("email_request", Connection = "ServiceBusConnection")]
+       [ServiceBusTrigger("%ServiceBusQueueName%", Connection = "ServiceBusConnection")]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions)
     {
@@ -34,10 +42,5 @@ public class EmailSender(ILogger<EmailSender> logger, IEmailService emailService
             _logger.LogError($"ERROR : EmailSender.Run() :: {ex.Message}");
         }
     }
-
-
 }
-
-//https://youtu.be/RzRn8kpzGnk?t=3057
-//ApplicationProperties, t.ex. messagetype= "token"
 
