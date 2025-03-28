@@ -26,7 +26,8 @@ public class EmailSender
             var emailRequest = _emailService.UnpackEmailRequest(message);
             if (emailRequest != null && !string.IsNullOrEmpty(emailRequest.To))
             {
-                if (_emailService.SendEmail(emailRequest))
+                var result = await _emailService.SendEmailAsync(emailRequest);
+                if (result)
                 {
                     await messageActions.CompleteMessageAsync(message);
                 }
